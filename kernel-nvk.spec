@@ -153,12 +153,7 @@ scripts/config -e CONFIG_IMA_ARCH_POLICY
 
 diff -u %{SOURCE1} .config || :
 
-%if %{_build_nv}
-    cd %{_builddir}/%{_nv_pkg}/kernel-open
-    %patch -P 10 -p1
-    cd ..
-    %autopatch -p1 -v -m 11 -M 19
-%endif
+
 
 %build
     %make_build EXTRAVERSION=-%{release}.%{_arch} all
