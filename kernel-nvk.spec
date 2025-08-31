@@ -1,5 +1,5 @@
 Name:           kernel-nvk
-Version:        1.0
+Version:        6.15
 Release:        1%{?dist}
 Summary:        Custom Linux Kernel NVK branch
 
@@ -27,3 +27,6 @@ make install INSTALL_PATH=%{buildroot}/boot
 %files
 /boot/*
 
+%changelog
+* Thu Sep 01 2025 Your Name <your.email@example.com> - 1.0-1
+- Initial build
