@@ -21,56 +21,42 @@
     %define _tarkver %{version}
 %endif
 
-# Build a minimal kernel config
+# Build minimal kernel config disabled
 %define _build_minimal 0
 
-# Builds the kernel with clang and enables ThinLTO
+# Don't build with clang/thinLTO
 %define _build_lto 0
 
-# Builds NVIDIA open kernel modules with the kernel
-%define _nv_pkg open-gpu-kernel-modules-%{_nv_ver}
-%if 0%{?fedora} >= 43
-    %define _build_nv 1
-    %define _nv_ver 580.76.05
-%elif 0%{?rhel}
-    %define _build_nv 0
-%else
-    %define _build_nv 1
-    %define _nv_ver 575.64.05
-    %define _nv_old 1
-%endif
+# No NVIDIA kernel modules build
+%define _build_nv 0
 
 # Kernel tickrate
 %define _hz_tick 300
 
-# Defines x86_64 ISA level used
+# x86_64 ISA level
 %define _x86_64_lvl 2
 
-# Directory paths for packaging
+# Packaging directories
 %define _kernel_dir /lib/modules/%{_kver}
 %define _devel_dir %{_usrsrc}/kernels/%{_kver}
 
-%define _patch_src https://raw.githubusercontent.com/CachyOS/kernel-patches/master/%{_basekver}
+# No patch source as no patches needed
+# %define _patch_src ...
 
-%if %{_build_lto}
-    %define _lto_args CC=clang CXX=clang++ LD=ld.lld LLVM=1 LLVM_IAS=1
-%endif
-
-%define _module_args KERNEL_UNAME=%{_kver} IGNORE_PREEMPT_RT_PRESENCE=1 SYSSRC=%{_builddir}/linux-%{_tarkver} SYSOUT=%{_builddir}/linux-%{_tarkver}
-
-Name:           kernel-cachyos-server%{?_lto_args:-lto}
-Summary:        Linux %{?_lto_args:+ LTO }EEVDF scheduler Kernel by CachyOS targeted for Servers workloads
+Name:           kernel-nvk
+Summary:        Vanilla Linux Kernel from NVK branch on GitLab
 Version:        %{_basekver}.%{_stablekver}
-Release:        cachyserver1%{?_lto_args:.lto}%{?dist}
+Release:        1%{?dist}
 License:        GPL-2.0-only
-URL:            https://cachyos.org
+URL:            https://gitlab.freedesktop.org/gfxstrand/linux
 
 Requires:       kernel-core-uname-r = %{_kver}
 Requires:       kernel-modules-uname-r = %{_kver}
 Requires:       kernel-modules-core-uname-r = %{_kver}
-Provides:       kernel-cachyos-server%{?_lto_args:-lto} > 6.12.9-cbrt1.0%{?_lto_args:.lto}%{?dist}
 Provides:       installonlypkg(kernel)
-Obsoletes:      kernel-cachyos-server%{?_lto_args:-lto} <= 6.12.9-cbrt1.0%{?_lto_args:.lto}%{?dist}
+Provides:       kernel = %{_rpmver}
+Provides:       kernel-core-uname-r = %{_kver}
+Provides:       kernel-uname-r = %{_kver}
 
 BuildRequires:  bc
 BuildRequires:  bison
@@ -91,313 +77,37 @@ BuildRequires:  python3-devel
 BuildRequires:  python3-pyyaml
 BuildRequires:  python-srpm-macros
 
-%if %{_build_lto}
-BuildRequires:  clang
-BuildRequires:  lld
-BuildRequires:  llvm
-%endif
-
-%if %{_build_nv}
-BuildRequires:  gcc-c++
-%endif
-
-# Use GitLab NVK branch as source
 Source0:        git+https://gitlab.freedesktop.org/gfxstrand/linux.git#branch=nvk
-
-Source1:        https://raw.githubusercontent.com/CachyOS/linux-cachyos/master/linux-cachyos-server/config
+Source1:        # Optional config file URL or remove if not used
 
 %description
-    The meta package for %{name}.
+Vanilla Linux kernel compiled from NVK branch on GitLab without patches.
 
 %prep
 %autosetup -S git
 
-cp %{SOURCE1} .config
-
-# Enable config options
-scripts/config -e CACHY
-scripts/config --set-str CONFIG_LSM lockdown,yama,integrity,selinux,bpf,landlock
-scripts/config -u DEFAULT_HOSTNAME
-scripts/config -d PREEMPT_DYNAMIC -d PREEMPT -d PREEMPT_VOLUNTARY -d PREEMPT_LAZY -e PREEMPT_NONE
-
-case %{_hz_tick} in
-    100|250|300|500|600|750|1000)
-        scripts/config -e HZ_%{_hz_tick} --set-val HZ %{_hz_tick};;
-    *)
-        echo "Invalid tickrate value, using default 1000"
-        scripts/config -e HZ_1000 --set-val HZ 1000;;
-esac
-
-%if %{_x86_64_lvl} >= 1 && %{_x86_64_lvl} < 5
-    scripts/config --set-val X86_64_VERSION %{_x86_64_lvl}
-%else
-    echo "Invalid x86_64 ISA Level. Using x86_64_v3"
-    scripts/config --set-val X86_64_VERSION 3
-%endif
-
-scripts/config -e CONFIG_IMA_SECURE_AND_OR_TRUSTED_BOOT
-scripts/config -e CONFIG_IMA
-scripts/config -e CONFIG_IMA_APPRAISE_BOOTPARAM
-scripts/config -e CONFIG_IMA_APPRAISE
-scripts/config -e CONFIG_IMA_ARCH_POLICY
-
-%if %{_build_lto}
-    scripts/config -e LTO_CLANG_THIN
-%endif
-
-%if %{_build_minimal}
-    %make_build LSMOD=%{SOURCE2} localmodconfig
-%else
-    %make_build olddefconfig
-%endif
-
-diff -u %{SOURCE1} .config || :
-
-
+# Optional: if you want to use a specific config file, uncomment and add
+# cp %{SOURCE1} .config
 
 %build
-    %make_build EXTRAVERSION=-%{release}.%{_arch} all
-
-%if %{_build_nv}
-    %make_build -C tools/bpf/bpftool vmlinux.h feature-clang-bpf-co-re=1...
-    cd %{_builddir}/%{_nv_pkg}
-    CFLAGS= CXXFLAGS= LDFLAGS= %make_build %{_module_args} IGNORE_CC_MISMATCH=yes modules
-%endif
+make defconfig
+make -j$(nproc)
 
 %install
-    echo "Installing the kernel image..."
-    install -Dm644 "$(%make_build -s image_name)" "%{buildroot}%{_kernel_dir}/vmlinuz"
-    zstdmt -19 < Module.symvers > %{buildroot}%{_kernel_dir}/symvers.zst
-
-    echo "Installing kernel modules..."
-    ZSTD_CLEVEL=19 %make_build INSTALL_MOD_PATH="%{buildroot}" INSTALL_MOD_STRIP=1 DEPMOD=/doesnt/exist modules_install
-
-    echo "Installing files for the development package..."
-    install -Dt %{buildroot}%{_devel_dir} -m644 .config Makefile Module.symvers System.map tools/bpf/bpftool/vmlinux.h
-    cp .config %{buildroot}%{_kernel_dir}/config
-    cp System.map %{buildroot}%{_kernel_dir}/System.map
-    cp --parents `find -type f -name "Makefile*" -o -name "Kconfig*"` %{buildroot}%{_devel_dir}
-    rm -rf %{buildroot}%{_devel_dir}/scripts
-    rm -rf %{buildroot}%{_devel_dir}/include
-    cp -a scripts %{buildroot}%{_devel_dir}
-    rm -rf %{buildroot}%{_devel_dir}/scripts/tracing
-    rm -f %{buildroot}%{_devel_dir}/scripts/spdxcheck.py
-
-    # Additional files for make scripts preparation
-    cp -a --parents security/selinux/include/classmap.h %{buildroot}%{_devel_dir}
-    cp -a --parents security/selinux/include/initial_sid_to_string.h %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/tools/be_byteshift.h %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/tools/le_byteshift.h %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/linux/compiler* %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/linux/types.h %{buildroot}%{_devel_dir}
-    cp -a --parents tools/build/Build.include %{buildroot}%{_devel_dir}
-    cp --parents tools/build/fixdep.c %{buildroot}%{_devel_dir}
-    cp --parents tools/objtool/sync-check.sh %{buildroot}%{_devel_dir}
-    cp -a --parents tools/bpf/resolve_btfids %{buildroot}%{_devel_dir}
-    cp --parents security/selinux/include/policycap_names.h %{buildroot}%{_devel_dir}
-    cp --parents security/selinux/include/policycap.h %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/asm %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/asm-generic %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/linux %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/uapi/asm %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/uapi/asm-generic %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/uapi/linux %{buildroot}%{_devel_dir}
-    cp -a --parents tools/include/vdso %{buildroot}%{_devel_dir}
-    cp --parents tools/scripts/utilities.mak %{buildroot}%{_devel_dir}
-    cp -a --parents tools/lib/subcmd %{buildroot}%{_devel_dir}
-    cp --parents tools/lib/*.c %{buildroot}%{_devel_dir}
-    cp --parents tools/objtool/*.[ch] %{buildroot}%{_devel_dir}
-    cp --parents tools/objtool/Build %{buildroot}%{_devel_dir}
-    cp --parents tools/objtool/include/objtool/*.h %{buildroot}%{_devel_dir}
-    cp -a --parents tools/lib/bpf %{buildroot}%{_devel_dir}
-    cp --parents tools/lib/bpf/Build %{buildroot}%{_devel_dir}
-
-    echo "Cleaning up development files..."
-    find %{buildroot}%{_devel_dir}/scripts \( -iname "*.o" -o -iname "*.cmd" \) -exec rm -f {} +
-    find %{buildroot}%{_devel_dir}/tools \( -iname "*.o" -o -iname "*.cmd" \) -exec rm -f {} +
-    touch -r %{buildroot}%{_devel_dir}/Makefile %{buildroot}%{_devel_dir}/include/generated/uapi/linux/version.h %{buildroot}%{_devel_dir}/include/config/auto.conf
-
-    rm -rf %{buildroot}%{_kernel_dir}/build
-    ln -s %{_devel_dir} %{buildroot}%{_kernel_dir}/build
-    ln -s %{_kernel_dir}/build %{buildroot}%{_kernel_dir}/source
-
-    echo "Creating stub initramfs..."
-    install -dm755 %{buildroot}/boot
-    dd if=/dev/zero of=%{buildroot}/boot/initramfs-%{_kver}.img bs=1M count=90
-
-%if %{_build_nv}
-    cd %{_builddir}/%{_nv_pkg}
-    echo "Installing NVIDIA open kernel modules..."
-    install -Dt %{buildroot}%{_kernel_dir}/nvidia -m644 kernel-open/*.ko
-    find %{buildroot}%{_kernel_dir}/nvidia -name '*.ko' -exec zstd --rm -19 {} +
-    install -Dt %{buildroot}/%{_defaultlicensedir}/%{name}-nvidia-open -m644 COPYING
-%endif
-
-%package core
-Summary:        Linux EEVDF scheduler Kernel by CachyOS targeted for Servers workloads
-AutoReq:        no
-Conflicts:      xfsprogs < 4.3.0-1
-Conflicts:      xorg-x11-drv-vmmouse < 13.0.99
-Provides:       kernel = %{_rpmver}
-Provides:       kernel-core-uname-r = %{_kver}
-Provides:       kernel-uname-r = %{_kver}
-Provides:       installonlypkg(kernel)
-Requires:       kernel-modules-uname-r = %{_kver}
-Requires(pre):  /usr/bin/kernel-install
-Requires(pre):  coreutils
-Requires(pre):  dracut >= 027
-Requires(pre):  systemd >= 203-2
-Requires(pre):  ((linux-firmware >= 20150904-56.git6ebf5d57) if linux-firmware)
-Requires(preun):systemd >= 200
-Recommends:     linux-firmware
-
-%description core
-    The kernel package contains the Linux kernel (vmlinuz), the core of any
-    Linux operating system.  The kernel handles the basic functions
-    of the operating system: memory allocation, process allocation, device
-    input and output, etc.
-
-%post core
-    mkdir -p %{_localstatedir}/lib/rpm-state/%{name}
-    touch %{_localstatedir}/lib/rpm-state/%{name}/installing_core_%{_kver}
-
-%posttrans core
-    rm -f %{_localstatedir}/lib/rpm-state/%{name}/installing_core_%{_kver}
-    if [ ! -e /run/ostree-booted ]; then
-        /bin/kernel-install add %{_kver} %{_kernel_dir}/vmlinuz || exit $?
-        if [[ ! -e "/boot/symvers-%{_kver}.zst" ]]; then
-            cp "%{_kernel_dir}/symvers.zst" "/boot/symvers-%{_kver}.zst"
-            if command -v restorecon &gt;/dev/null; then
-                restorecon "/boot/symvers-%{_kver}.zst"
-            fi
-        fi
-    fi
-
-%preun core
-    /bin/kernel-install remove %{_kver} || exit $?
-    if [ -x /usr/sbin/weak-modules ]; then
-        /usr/sbin/weak-modules --remove-kernel %{_kver} || exit $?
-    fi
-
-%files core
-    %license COPYING
-    %ghost %attr(0600, root, root) /boot/initramfs-%{_kver}.img
-    %ghost %attr(0644, root, root) /boot/symvers-%{_kver}.zst
-    %{_kernel_dir}/vmlinuz
-    %{_kernel_dir}/modules.builtin
-    %{_kernel_dir}/modules.builtin.modinfo
-    %{_kernel_dir}/symvers.zst
-    %{_kernel_dir}/config
-    %{_kernel_dir}/System.map
-
-%package modules
-Summary:        Kernel modules package for %{name}
-Provides:       kernel-modules = %{_rpmver}
-Provides:       kernel-modules-core = %{_rpmver}
-Provides:       kernel-modules-extra = %{_rpmver}
-Provides:       kernel-modules-uname-r = %{_kver}
-Provides:       kernel-modules-core-uname-r = %{_kver}
-Provides:       kernel-modules-extra-uname-r = %{_kver}
-Provides:       v4l2loopback-kmod = 0.14.0
-Provides:       installonlypkg(kernel-module)
-Requires:       kernel-uname-r = %{_kver}
-
-%description modules
-    This package provides kernel modules for the %{name}-core kernel package.
-
-%post modules
-    if [ ! -f %{_localstatedir}/lib/rpm-state/%{name}/installing_core_%{_kver} ]; then
-        mkdir -p %{_localstatedir}/lib/rpm-state/%{name}
-        touch %{_localstatedir}/lib/rpm-state/%{name}/need_to_run_dracut_%{_kver}
-    fi
-
-%posttrans modules
-    rm -f %{_localstatedir}/lib/rpm-state/%{name}/need_to_run_dracut_%{_kver}
-    /sbin/depmod -a %{_kver}
-    if [ ! -e /run/ostree-booted ]; then
-        if [ -f %{_localstatedir}/lib/rpm-state/%{name}/need_to_run_dracut_%{_kver} ]; then
-            echo "Running: dracut -f --kver %{_kver}"
-            dracut -f --kver "%{_kver}" || exit $?
-        fi
-    fi
-
-%files modules
-    %dir %{_kernel_dir}
-    %{_kernel_dir}/modules.order
-    %{_kernel_dir}/build
-    %{_kernel_dir}/source
-    %{_kernel_dir}/kernel
-
-%package devel
-Summary:        Development package for building kernel modules to match %{name}
-Provides:       kernel-devel = %{_rpmver}
-Provides:       kernel-devel-uname-r = %{_kver}
-Provides:       installonlypkg(kernel)
-AutoReqProv:    no
-Requires(pre):  findutils
-Requires:       findutils
-Requires:       perl-interpreter
-Requires:       openssl-devel
-Requires:       elfutils-libelf-devel
-Requires:       bison
-Requires:       flex
-Requires:       make
-
-%if %{_build_lto}
-Requires:       clang
-Requires:       lld
-Requires:       llvm
-%else
-Requires:       gcc
-%endif
-
-%description devel
-    This package provides kernel headers and makefiles sufficient to build modules against %{name}.
-
-%post devel
-    if [ -f /etc/sysconfig/kernel ]; then
-        . /etc/sysconfig/kernel || exit $?
-    fi
-    if [ "$HARDLINK" != "no" -a -x /usr/bin/hardlink -a ! -e /run/ostree-booted ]; then
-        (cd /usr/src/kernels/%{_kver} &amp;&amp;
-        /usr/bin/find . -type f | while read f; do
-            hardlink -c /usr/src/kernels/*%{?dist}.*/$f $f &gt; /dev/null
-        done;
-        )
-    fi
-
-%files devel
-    %{_devel_dir}
-
-%package devel-matched
-Summary:        Meta package to install matching core and devel packages for %{name}
-Provides:       kernel-devel-matched = %{_rpmver}
-Requires:       %{name}-core = %{_rpmver}
-Requires:       %{name}-devel = %{_rpmver}
-
-%description devel-matched
-    This meta package is used to install matching core and devel packages for %{name}.
-
-%files devel-matched
-
-%if %{_build_nv}
-%package nvidia-open
-Summary:        nvidia-open %{_nv_ver} kernel modules for %{name}
-Provides:       nvidia-kmod >= %{_nv_ver}
-Provides:       installonlypkg(kernel-module)
-Requires:       kernel-uname-r = %{_kver}
-Conflicts:      akmod-nvidia
-Recommends:     xorg-x11-drv-nvidia >= %{_nv_ver}
-
-%description nvidia-open
-    This package provides nvidia-open %{_nv_ver} kernel modules for %{name}.
-
-%post nvidia-open
-    /sbin/depmod -a %{_kver}
-
-%files nvidia-open
-    %license %{_defaultlicensedir}/%{name}-nvidia-open/COPYING
-    %{_kernel_dir}/nvidia
-%endif
+make INSTALL_MOD_PATH=%{buildroot} modules_install
+install -d %{buildroot}%{_kernel_dir}
+install -m 644 arch/x86/boot/bzImage %{buildroot}%{_kernel_dir}/vmlinuz
 
 %files
+%license COPYING
+%doc README.md
+%{_kernel_dir}/vmlinuz
+%{_kernel_dir}/modules.builtin
+%{_kernel_dir}/modules.builtin.modinfo
+%{_kernel_dir}/symvers.zst
+%{_kernel_dir}/config
+%{_kernel_dir}/System.map
+
+%changelog
+* Mon Sep  1 2025 Your Name <your.email@example.com> - 1.0-1
+- Build vanilla Linux kernel from NVK branch without patches
