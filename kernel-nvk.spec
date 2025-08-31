@@ -21,15 +21,15 @@
     %define _tarkver %{version}
 %endif
 
-# Build a minimal kernel via modprobed.db
+# Build a minimal kernel config
 %define _build_minimal 0
 
 # Builds the kernel with clang and enables ThinLTO
 %define _build_lto 0
 
-# Builds nvidia-open kernel modules with the kernel
+# Builds NVIDIA open kernel modules with the kernel
 %define _nv_pkg open-gpu-kernel-modules-%{_nv_ver}
-%if 0%{?fedora} &gt;= 43
+%if 0%{?fedora} >= 43
     %define _build_nv 1
     %define _nv_ver 580.76.05
 %elif 0%{?rhel}
@@ -40,21 +40,19 @@
     %define _nv_old 1
 %endif
 
-# Define tickrate
+# Kernel tickrate
 %define _hz_tick 300
 
 # Defines x86_64 ISA level used
 %define _x86_64_lvl 2
 
-# Define directory paths to be used during packaging
+# Directory paths for packaging
 %define _kernel_dir /lib/modules/%{_kver}
 %define _devel_dir %{_usrsrc}/kernels/%{_kver}
 
-# Patch source URL - optionally remove if you don't want patches
 %define _patch_src https://raw.githubusercontent.com/CachyOS/kernel-patches/master/%{_basekver}
 
 %if %{_build_lto}
-    # Build environment variables for clang build
     %define _lto_args CC=clang CXX=clang++ LD=ld.lld LLVM=1 LLVM_IAS=1
 %endif
 
@@ -70,9 +68,9 @@ URL:            https://cachyos.org
 Requires:       kernel-core-uname-r = %{_kver}
 Requires:       kernel-modules-uname-r = %{_kver}
 Requires:       kernel-modules-core-uname-r = %{_kver}
-Provides:       kernel-cachyos-server%{?_lto_args:-lto} &gt; 6.12.9-cbrt1.0%{?_lto_args:.lto}%{?dist}
+Provides:       kernel-cachyos-server%{?_lto_args:-lto} > 6.12.9-cbrt1.0%{?_lto_args:.lto}%{?dist}
 Provides:       installonlypkg(kernel)
-Obsoletes:      kernel-cachyos-server%{?_lto_args:-lto} &lt;= 6.12.9-cbrt1.0%{?_lto_args:.lto}%{?dist}
+Obsoletes:      kernel-cachyos-server%{?_lto_args:-lto} <= 6.12.9-cbrt1.0%{?_lto_args:.lto}%{?dist}
 
 BuildRequires:  bc
 BuildRequires:  bison
@@ -103,35 +101,20 @@ BuildRequires:  llvm
 BuildRequires:  gcc-c++
 %endif
 
-# Set source0 to GitLab NVK branch
+# Use GitLab NVK branch as source
 Source0:        git+https://gitlab.freedesktop.org/gfxstrand/linux.git#branch=nvk
 
-# Other sources can be omitted or adapted as needed:
 Source1:        https://raw.githubusercontent.com/CachyOS/linux-cachyos/master/linux-cachyos-server/config
-#Source2:        # comment or remove if not used
-#Source10:       # comment or remove if not used
-
-# Comment out patches if not needed or adjust accordingly
-#Patch0:         %{_patch_src}/all/0001-cachyos-base-all.patch
-#%if %{_build_lto}
-#Patch2:         %{_patch_src}/misc/dkms-clang.patch
-#%endif
-
-#%if %{_build_nv}
-#Patch10:        %{_patch_src}/misc/nvidia/0001-Enable-atomic-kernel-modesetting-by-default.patch
-#%endif
 
 %description
     The meta package for %{name}.
 
 %prep
-# Use git source setup
 %autosetup -S git
 
-# If config file is needed to overwrite default config from the repo, adjust here
 cp %{SOURCE1} .config
 
-# Enable various kernel options as before
+# Enable config options
 scripts/config -e CACHY
 scripts/config --set-str CONFIG_LSM lockdown,yama,integrity,selinux,bpf,landlock
 scripts/config -u DEFAULT_HOSTNAME
@@ -145,7 +128,7 @@ case %{_hz_tick} in
         scripts/config -e HZ_1000 --set-val HZ 1000;;
 esac
 
-%if %{_x86_64_lvl} &lt; 5 &amp;&amp; %{_x86_64_lvl} &gt; 0
+%if %{_x86_64_lvl} >= 1 && %{_x86_64_lvl} < 5
     scripts/config --set-val X86_64_VERSION %{_x86_64_lvl}
 %else
     echo "Invalid x86_64 ISA Level. Using x86_64_v3"
@@ -205,7 +188,7 @@ diff -u %{SOURCE1} .config || :
     rm -rf %{buildroot}%{_devel_dir}/scripts/tracing
     rm -f %{buildroot}%{_devel_dir}/scripts/spdxcheck.py
 
-    # Additional files needed for make scripts and preparation
+    # Additional files for make scripts preparation
     cp -a --parents security/selinux/include/classmap.h %{buildroot}%{_devel_dir}
     cp -a --parents security/selinux/include/initial_sid_to_string.h %{buildroot}%{_devel_dir}
     cp -a --parents tools/include/tools/be_byteshift.h %{buildroot}%{_devel_dir}
@@ -405,11 +388,11 @@ Requires:       %{name}-devel = %{_rpmver}
 %if %{_build_nv}
 %package nvidia-open
 Summary:        nvidia-open %{_nv_ver} kernel modules for %{name}
-Provides:       nvidia-kmod &gt;= %{_nv_ver}
+Provides:       nvidia-kmod >= %{_nv_ver}
 Provides:       installonlypkg(kernel-module)
 Requires:       kernel-uname-r = %{_kver}
 Conflicts:      akmod-nvidia
-Recommends:     xorg-x11-drv-nvidia &gt;= %{_nv_ver}
+Recommends:     xorg-x11-drv-nvidia >= %{_nv_ver}
 
 %description nvidia-open
     This package provides nvidia-open %{_nv_ver} kernel modules for %{name}.
