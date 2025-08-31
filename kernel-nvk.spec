@@ -41,7 +41,7 @@
 %define _devel_dir %{_usrsrc}/kernels/%{_kver}
 
 # No patch source as no patches needed
-# %define _patch_src ...
+
 
 Name:           kernel-nvk
 Summary:        Vanilla Linux Kernel from NVK branch on GitLab
