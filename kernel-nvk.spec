@@ -5,7 +5,7 @@ Summary:        Custom Linux Kernel NVK branch
 
 License:        GPL-2.0
 URL:            https://github.com/Youssef3mk/nvk-kernel-
-Source0:         git+https://gitlab.freedesktop.org/gfxstrand/linux.git#branch=nvk
+Source0:         git+https://gitlab.freedesktop.org/gfxstrand/linux/-/archive/nvk/linux-nvk.tar.gz
 
 BuildRequires:  gcc, make, ncurses-devel, bc, elfutils-libelf-devel
 Requires:       elfutils-libelf
