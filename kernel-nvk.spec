@@ -23,9 +23,9 @@ make -j$(nproc)
 %install
 make modules_install INSTALL_MOD_PATH=%{buildroot}
 make install INSTALL_PATH=%{buildroot}/boot
-
 %files
-/boot/*
+%{_bootdir}/*
+
 
 %changelog
 * Thu Sep 01 2025 Your Name <your.email@example.com> - 1.0-1
