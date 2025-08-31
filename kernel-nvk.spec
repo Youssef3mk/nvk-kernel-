@@ -78,7 +78,8 @@ BuildRequires:  python3-pyyaml
 BuildRequires:  python-srpm-macros
 
 Source0:        git+https://gitlab.freedesktop.org/gfxstrand/linux.git#branch=nvk
-Source1:        # Optional config file URL or remove if not used
+Source1:            https://raw.githubusercontent.com/CachyOS/linux-cachyos/master/linux-cachyos-server/config
+
 
 %description
 Vanilla Linux kernel compiled from NVK branch on GitLab without patches.
