@@ -1,15 +1,15 @@
 %global commit 1a4fa013dcc112439edf57a3708c77d4ab6ba21a
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global buildid .nvk
+
 
 Name:           kernel-nvk
-Version:        6.12.0
+Version:        6.15.0
 Release:        1%{?dist}
 Summary:        Linux kernel with NVK (Nouveau Vulkan) support
 
 License:        GPL-2.0-only
 URL:            https://gitlab.freedesktop.org/gfxstrand/linux
-Source0:        linux-%{shortcommit}.tar.gz
+Source0:        https://gitlab.freedesktop.org/gfxstrand/linux/-/archive/nvk/linux-nvk.tar.gz
 
 BuildRequires:  gcc
 BuildRequires:  make
