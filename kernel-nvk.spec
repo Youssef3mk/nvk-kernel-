@@ -1917,6 +1917,9 @@ Prebuilt 64k unified kernel image addons for virtual machines.
 
 curl -L -o linux-6.16.3.tar.gz https://gitlab.freedesktop.org/gfxstrand/linux/-/archive/nvk/linux-nvk.tar.gz
 %{log_msg "Start of prep stage"}
+# اجعل كل سكربت Bash منسوخ قابلًا للتنفيذ
+find . -type f -name "*.sh" -exec chmod +x {} +
+
 
 %{log_msg "Sanity checks"}
 
@@ -2046,6 +2049,7 @@ cp %{SOURCE3000} .
 # kernel-local - rename and copy for partial snippet config process
 cp %{SOURCE3001} partial-kernel-local-snip.config
 cp %{SOURCE3001} partial-kernel-local-debug-snip.config
+chmod +x generate_all_configs.sh
 FLAVOR=%{primary_target} SPECPACKAGE_NAME=%{name} SPECVERSION=%{specversion} SPECRPMVERSION=%{specrpmversion} ./generate_all_configs.sh %{debugbuildsenabled}
 
 # Collect custom defined config options
