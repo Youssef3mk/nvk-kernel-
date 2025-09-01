@@ -2,6 +2,8 @@
 # Per the below section about __spec_install_pre, any rpm
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
+%define nopatches 1
+%define with_vanilla 1
 
 # Disable frame pointers
 %undefine _include_frame_pointers
@@ -1843,84 +1845,9 @@ Prebuilt 64k unified kernel image addons for virtual machines.
 
 %{log_msg "Sanity checks"}
 
-# do a few sanity-checks for --with *only builds
-%if %{with_baseonly}
-%if !%{with_up}
-%{log_msg "Cannot build --with baseonly, up build is disabled"}
-exit 1
-%endif
-%endif
-
-# more sanity checking; do it quietly
-if [ "%{patches}" != "%%{patches}" ] ; then
-  for patch in %{patches} ; do
-    if [ ! -f $patch ] ; then
-	%{log_msg "ERROR: Patch  ${patch##/*/}  listed in specfile but is missing"}
-      exit 1
-    fi
-  done
-fi 2>/dev/null
-
-patch_command='git --work-tree=. apply'
-ApplyPatch()
-{
-  local patch=$1
-  shift
-  if [ ! -f $RPM_SOURCE_DIR/$patch ]; then
-    exit 1
-  fi
-  if ! grep -E "^Patch[0-9]+: $patch\$" %{_specdir}/kernel.spec ; then
-    if [ "${patch:0:8}" != "patch-%{kversion}." ] ; then
-	%{log_msg "ERROR: Patch  $patch  not listed as a source patch in specfile"}
-      exit 1
-    fi
-  fi 2>/dev/null
-  case "$patch" in
-  *.bz2) bunzip2 < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
-  *.gz)  gunzip  < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
-  *.xz)  unxz    < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
-  *) $patch_command ${1+"$@"} < "$RPM_SOURCE_DIR/$patch" ;;
-  esac
-}
-
-# don't apply patch if it's empty
-ApplyOptionalPatch()
-{
-  local patch=$1
-  shift
-  %{log_msg "ApplyOptionalPatch: $1"}
-  if [ ! -f $RPM_SOURCE_DIR/$patch ]; then
-    exit 1
-  fi
-  local C=$(wc -l $RPM_SOURCE_DIR/$patch | awk '{print $1}')
-  if [ "$C" -gt 9 ]; then
-    ApplyPatch $patch ${1+"$@"}
-  fi
-}
-
-%{log_msg "Untar kernel tarball"}
-%setup -q -n kernel-%{tarfile_release} -c
-mv linux-%{tarfile_release} linux-%{KVERREL}
-
-cd linux-%{KVERREL}
-%if 0%{?stable_update}
-ApplyOptionalPatch %{stable_patch_00}
-%endif
-
-%{log_msg "Start of patch applications"}
-%if !%{nopatches}
-
-ApplyOptionalPatch patch-%{patchversion}-redhat.patch
-%endif
-
-ApplyOptionalPatch linux-kernel-test.patch
-
-%{log_msg "End of patch applications"}
-# END OF PATCH APPLICATIONS
 
 # Any further pre-build tree manipulations happen here.
 %{log_msg "Pre-build tree manipulations"}
-chmod +x scripts/checkpatch.pl
 mv COPYING COPYING-%{specrpmversion}-%{release}
 
 # on linux-next prevent scripts/setlocalversion from mucking with our version numbers
