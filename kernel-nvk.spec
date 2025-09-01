@@ -1,5 +1,5 @@
 Name:           kernel-nvk
-Version:       6.15
+Version:        6.15
 Release:        1%{?dist}
 Summary:        Linux Kernel from NVK branch on GitLab
 
@@ -28,13 +28,11 @@ install -m 644 System.map %{buildroot}/boot/System.map-%{version}-nvk
 install -m 644 .config %{buildroot}/boot/config-%{version}-nvk
 
 %files
-%license COPYING
-%doc README.md
 /boot/vmlinuz-%{version}-nvk
 /boot/System.map-%{version}-nvk
 /boot/config-%{version}-nvk
 /usr/lib/modules/%{version}-nvk
 
 %changelog
-* Mon Sep 01 2025 Youssef3mk <your.email@example.com> - 6.10-1
+* Mon Sep 01 2025 Youssef3mk <your.email@example.com> - 6.15-1
 - Initial build of kernel from NVK branch on GitLab
