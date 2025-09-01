@@ -925,7 +925,7 @@ BuildRequires: redhat-sb-certs >= 9.4-0.1
 # exact git commit you can run
 #
 # xzcat -qq ${TARBALL} | git get-tar-commit-id
-Source0:  linux-6.16.3.tar.gz
+Source0:   https://gitlab.freedesktop.org/gfxstrand/linux/-/archive/nvk/linux-nvk.tar.gz
 
 Source1: Makefile.rhelver
 Source2: %{package_name}.changelog
@@ -1984,7 +1984,7 @@ ApplyOptionalPatch()
 %{log_msg "Untar kernel tarball"}
 %setup -q -n kernel-%{tarfile_release} -c
 
-mv linux-%{tarfile_release} linux-%{KVERREL}
+mv linux-nvk  linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 cp -a %{SOURCE1} .
