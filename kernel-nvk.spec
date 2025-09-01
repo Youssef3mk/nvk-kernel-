@@ -1992,6 +1992,9 @@ ApplyOptionalPatch()
 mv linux-nvk  linux-%{KVERREL}
 
 cd linux-%{KVERREL}
+# تمكين ميزة let_chains في ملفات Rust لإصلاح E0658
+echo '#![feature(let_chains)]' | tee -a rust/library/core/src/slice/index.rs rust/library/core/src/slice/iter.rs rust/library/core/src/str/iter.rs rust/library/core/src/ffi/c_str.rs
+
 cp -a %{SOURCE1} .
 
 %{log_msg "Start of patch applications"}
@@ -2157,7 +2160,6 @@ for opt in %{clang_make_opts}; do
 done
 %endif
 %{log_msg "Generate redhat configs"}
-chmod +x *
 RHJOBS=$RPM_BUILD_NCPUS SPECPACKAGE_NAME=%{name} ./process_configs.sh $OPTS %{specrpmversion}
 
 # We may want to override files from the primary target in case of building
