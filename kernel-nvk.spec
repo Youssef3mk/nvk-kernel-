@@ -1912,15 +1912,8 @@ Prebuilt 64k unified kernel image addons for virtual machines.
 	_log_msglineno=$(grep -n %{*} %{_specdir}/${RPM_PACKAGE_NAME}.spec | grep log_msg | cut -d":" -f1) \
 	echo "kernel.spec:${_log_msglineno}: %{*}" \
 	set -x
-
 %prep
-
-curl -L -o linux-6.16.3.tar.gz https://gitlab.freedesktop.org/gfxstrand/linux/-/archive/nvk/linux-nvk.tar.gz
 %{log_msg "Start of prep stage"}
-# اجعل كل سكربت Bash منسوخ قابلًا للتنفيذ
-find . -type f \( -name '*.sh' -o -name '*.py' \) -exec chmod +x {} +
-
-
 
 %{log_msg "Sanity checks"}
 
@@ -1988,19 +1981,15 @@ ApplyOptionalPatch()
 
 %{log_msg "Untar kernel tarball"}
 %setup -q -n kernel-%{tarfile_release} -c
-
-mv linux-nvk  linux-%{KVERREL}
+mv linux-nvk linux-%{KVERREL}
 
 cd linux-%{KVERREL}
-# تمكين ميزة let_chains في ملفات Rust لإصلاح E0658
-echo '#![feature(let_chains)]' | tee -a rust/library/core/src/slice/index.rs rust/library/core/src/slice/iter.rs rust/library/core/src/str/iter.rs rust/library/core/src/ffi/c_str.rs
-
 cp -a %{SOURCE1} .
 
 %{log_msg "Start of patch applications"}
 %if !%{nopatches}
 
-#ApplyOptionalPatch patch-%{patchversion}-redhat.patch
+ApplyOptionalPatch patch-%{patchversion}-redhat.patch
 %endif
 
 ApplyOptionalPatch linux-kernel-test.patch
@@ -2035,6 +2024,13 @@ rm -f localversion-next localversion-rt
 	Documentation \
 	scripts/clang-tools 2> /dev/null
 
+# إصلاح خطأ Rust E0658 (فقط إذا كان مجلد rust موجود)
+if [ -d rust/library/core/src ]; then
+    echo '#![feature(let_chains)]' | tee -a rust/library/core/src/slice/index.rs rust/library/core/src/slice/iter.rs rust/library/core/src/str/iter.rs rust/library/core/src/ffi/c_str.rs
+else
+    %{log_msg "Rust directory not found, skipping let_chains feature addition"}
+fi
+
 # only deal with configs if we are going to build for the arch
 %ifnarch %nobuildarches
 
@@ -2054,12 +2050,8 @@ cp %{SOURCE3000} .
 cp %{SOURCE3001} partial-kernel-local-snip.config
 cp %{SOURCE3001} partial-kernel-local-debug-snip.config
 
-
-chmod +x generate_all_configs.sh
-chmod +x *
-chmod +x merge.py
-
-find . -type f -name "*.sh" -exec chmod +x {} +
+# منح صلاحيات تنفيذ عامة لجميع السكربتات .sh و .py
+find . -type f \( -name '*.sh' -o -name '*.py' \) -exec chmod +x {} +
 
 FLAVOR=%{primary_target} SPECPACKAGE_NAME=%{name} SPECVERSION=%{specversion} SPECRPMVERSION=%{specrpmversion} ./generate_all_configs.sh %{debugbuildsenabled}
 
@@ -2114,41 +2106,7 @@ do
 done
 %endif
 
-%if %{signkernel}%{signmodules}
-
-# Add DUP and kpatch certificates to system trusted keys for RHEL
-truncate -s0 ../certs/rhel.pem
-%if 0%{?rhel}
-%if %{rhelkeys}
-%{log_msg "Add DUP and kpatch certificates to system trusted keys for RHEL"}
-openssl x509 -inform der -in %{SOURCE100} -out rheldup3.pem
-openssl x509 -inform der -in %{SOURCE101} -out rhelkpatch1.pem
-openssl x509 -inform der -in %{SOURCE102} -out nvidiagpuoot001.pem
-cat rheldup3.pem rhelkpatch1.pem nvidiagpuoot001.pem >> ../certs/rhel.pem
-# rhelkeys
-%endif
-%if %{signkernel}
-%ifarch s390x ppc64le
-openssl x509 -inform der -in %{secureboot_ca_0} -out secureboot.pem
-cat secureboot.pem >> ../certs/rhel.pem
-%endif
-%endif
-
-# rhel
-%endif
-
-openssl x509 -inform der -in %{ima_ca_cert} -out imaca.pem
-cat imaca.pem >> ../certs/rhel.pem
-
-for i in *.config; do
-  sed -i 's@CONFIG_SYSTEM_TRUSTED_KEYS=""@CONFIG_SYSTEM_TRUSTED_KEYS="certs/rhel.pem"@' $i
-done
-%endif
-
-chmod +x *
-
-%{log_msg "Set process_configs.sh $OPTS"}
-chmod +x *
+# Set process_configs.sh $OPTS
 cp %{SOURCE81} .
 OPTS="-w -n -c"
 %if !%{with_configchecks}
@@ -2190,7 +2148,6 @@ update_scripts $update_target
 
 %{log_msg "End of kernel config"}
 cd ..
-chmod +x *
 # # End of Configs stuff
 
 # get rid of unwanted files resulting from patch fuzz
@@ -2200,6 +2157,7 @@ find . \( -name "*.orig" -o -name "*~" \) -delete >/dev/null
 find . -name .gitignore -delete >/dev/null
 
 cd ..
+
 chmod +x *
 ###
 ### build
