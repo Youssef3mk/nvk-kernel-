@@ -925,7 +925,7 @@ BuildRequires: redhat-sb-certs >= 9.4-0.1
 # exact git commit you can run
 #
 # xzcat -qq ${TARBALL} | git get-tar-commit-id
-Source0:  https://gitlab.freedesktop.org/gfxstrand/linux/-/archive/nvk/linux-nvk.tar.gz
+Source0:  linux-6.16.3.tar.gz
 
 Source1: Makefile.rhelver
 Source2: %{package_name}.changelog
@@ -1913,6 +1913,8 @@ Prebuilt 64k unified kernel image addons for virtual machines.
 	set -x
 
 %prep
+
+curl -L -o linux-6.16.3.tar.gz https://gitlab.freedesktop.org/gfxstrand/linux/-/archive/nvk/linux-nvk.tar.gz
 %{log_msg "Start of prep stage"}
 
 %{log_msg "Sanity checks"}
@@ -1981,7 +1983,7 @@ ApplyOptionalPatch()
 
 %{log_msg "Untar kernel tarball"}
 %setup -q -n kernel-%{tarfile_release} -c
-mv linux-nvk.tar.gz linux-6.16.3.tar.gz
+
 mv linux-%{tarfile_release} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
