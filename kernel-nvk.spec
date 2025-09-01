@@ -2173,6 +2173,10 @@ chmod +x *
 ###
 %build
 %{log_msg "Start of build stage"}
+# تثبيت Rust أحدث عبر rustup (رسمي)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source $HOME/.cargo/env
+rustup update stable  # تحديث إلى أحدث إصدار مستقر (مثل 1.89+)
 
 %{log_msg "General arch build configuration"}
 rm -rf %{buildroot_unstripped} || true
