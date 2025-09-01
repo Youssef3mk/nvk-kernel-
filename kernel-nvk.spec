@@ -1980,9 +1980,9 @@ ApplyOptionalPatch()
 
 %{log_msg "Untar kernel tarball"}
 %setup -q -n kernel-%{tarfile_release} -c
-mv linux-%{tarfile_release} linux-%{KVERREL}
+mv linux-%{tarfile_release} linux-nvk
 
-cd linux-%{KVERREL}
+cd linux-nvk
 cp -a %{SOURCE1} .
 
 %{log_msg "Start of patch applications"}
@@ -2283,10 +2283,10 @@ BuildKernel() {
     # Make build directory unique for each variant, so that gcno symlinks
     # are also unique for each variant.
     if [ -n "$Variant" ]; then
-        ln -s $(pwd) ../linux-%{KVERREL}-${Variant}
+        ln -s $(pwd) ../linux-nvk-${Variant}
     fi
     %{log_msg "GCOV - continuing build in: $(pwd)"}
-    pushd ../linux-%{KVERREL}${Variant:+-${Variant}}
+    pushd ../linux-nvk${Variant:+-${Variant}}
     pwd > ../kernel${Variant:+-${Variant}}-gcov.list
 %endif
 
@@ -3051,7 +3051,7 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/boot
 mkdir -p $RPM_BUILD_ROOT%{_libexecdir}
 
-cd linux-%{KVERREL}
+cd linux-nvk
 
 %if %{with_debug}
 %if %{with_realtime}
@@ -3413,7 +3413,7 @@ find Documentation -type d | xargs chmod u+w
 
 %install
 
-cd linux-%{KVERREL}
+cd linux-nvk
 
 # re-define RPM_VMLINUX_H, because it doesn't carry over from %build
 RPM_VMLINUX_H="$(cat ../vmlinux_h_path)"
@@ -4040,7 +4040,7 @@ fi\
 %{_libexecdir}/perf-core/*
 %{_mandir}/man[1-8]/perf*
 %{_sysconfdir}/bash_completion.d/perf
-%doc linux-%{KVERREL}/tools/perf/Documentation/examples.txt
+%doc linux-nvk/tools/perf/Documentation/examples.txt
 %{_docdir}/perf-tip/tips.txt
 %{_includedir}/perf/perf_dlfilter.h
 
@@ -4210,7 +4210,7 @@ fi\
 %if %{2}\
 %{expand:%%files %{?1:-f kernel-%{?3:%{3}-}ldsoconf.list} %{?3:%{3}-}core}\
 %{!?_licensedir:%global license %%doc}\
-%%license linux-%{KVERREL}/COPYING-%{version}-%{release}\
+%%license linux-nvk/COPYING-%{version}-%{release}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/%{?-k:%{-k*}}%{!?-k:vmlinuz}\
 %ghost /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?3:+%{3}}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/.vmlinuz.hmac \
