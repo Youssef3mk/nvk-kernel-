@@ -5,7 +5,7 @@ Summary:        Linux Kernel from NVK branch on GitLab
 
 License:        GPL-2.0-only
 URL:            https://gitlab.freedesktop.org/gfxstrand/linux
-Source0:        git+https://gitlab.freedesktop.org/gfxstrand/linux.git#branch=nvk
+Source0:       https://gitlab.freedesktop.org/gfxstrand/linux/-/archive/nvk/linux-nvk.tar.gz
 
 BuildRequires:  bc bison dwarves elfutils-libelf-devel flex gcc gettext-devel kmod make ncurses-devel openssl-devel perl python3-devel
 
