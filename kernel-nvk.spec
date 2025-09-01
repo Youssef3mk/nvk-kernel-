@@ -9,7 +9,7 @@ Summary:        Linux kernel with NVK (Nouveau Vulkan) support
 
 License:        GPL-2.0-only
 URL:            https://gitlab.freedesktop.org/gfxstrand/linux
-Source0:        https://gitlab.freedesktop.org/gfxstrand/linux/-/archive/%{commit}/linux-%{shortcommit}.tar.gz
+Source0:        linux-%{shortcommit}.tar.gz
 
 BuildRequires:  gcc
 BuildRequires:  make
