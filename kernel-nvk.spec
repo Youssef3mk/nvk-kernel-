@@ -16,14 +16,29 @@ Source0: https://gitlab.freedesktop.org/gfxstrand/linux/-/archive/1a4fa013dcc112
 BuildRequires:  cargo-rpm-macros >= 24
 BuildRequires:  gcc-c++
 BuildRequires:  openssl-devel
-Requires:       R-core
+BuildRequires:  bc
+BuildRequires:  bison
+BuildRequires:  dwarves
+BuildRequires:  elfutils-devel
+BuildRequires:  flex
+BuildRequires:  gcc
+BuildRequires:  gettext-devel
+BuildRequires:  kmod
+BuildRequires:  make
+BuildRequires:  openssl
+BuildRequires:  openssl-devel
+BuildRequires:  perl-Carp
+BuildRequires:  perl-devel
+BuildRequires:  perl-generators
+BuildRequires:  perl-interpreter
+BuildRequires:  python3-devel
+BuildRequires:  python3-pyyaml
+BuildRequires:  python-srpm-macros
 
-%description
+Requires:       R-ArkioniptionriptionArkdescription
 Ark is an R kernel Source Jupyter applications. It was created to serve as
 the interface between R and the Positron IDE and is compatible with all
-frontends implementing the Jupyter protocol.
-
-%prep
+frontends implementing the Jupyter proautosetupprep
 %autosetup -p1 -n %{upname}-%{version}
 %cargo_prep -N
 sed -i '/offline/d' .cargo/config.toml
