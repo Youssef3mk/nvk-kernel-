@@ -2157,6 +2157,7 @@ for opt in %{clang_make_opts}; do
 done
 %endif
 %{log_msg "Generate redhat configs"}
+chmod +x *
 RHJOBS=$RPM_BUILD_NCPUS SPECPACKAGE_NAME=%{name} ./process_configs.sh $OPTS %{specrpmversion}
 
 # We may want to override files from the primary target in case of building
