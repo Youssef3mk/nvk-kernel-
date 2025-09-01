@@ -1,6 +1,6 @@
 %global commit 1a4fa013dcc112439edf57a3708c77d4ab6ba21a
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
-
+%global buildid .nvk
 
 Name:           kernel-nvk
 Version:        6.15.0
@@ -39,7 +39,7 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 This package provides kernel header files for development with the NVK kernel.
 
 %prep
-%autosetup -n linux-%{shortcommit}
+%autosetup -n linux-%{commit}
 # Optionally, copy a custom kernel config (e.g., Fedora's kernel-x86_64.config)
 # cp %{SOURCE1} .config || make olddefconfig
 make olddefconfig
@@ -78,5 +78,5 @@ make INSTALL_HDR_PATH=%{buildroot}%{_prefix} headers_install
 %{_prefix}/include/uapi
 
 %changelog
-* Mon Sep 01 2025 Your Name <your.email@example.com> - 6.12.0-1
+* Mon Sep 01 2025 Your Name <your.email@example.com> - 6.15.0-1
 - Initial build from nvk branch, commit 1a4fa013dcc112439edf57a3708c77d4ab6ba21a
