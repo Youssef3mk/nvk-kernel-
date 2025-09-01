@@ -2023,13 +2023,10 @@ rm -f localversion-next localversion-rt
 	tools \
 	Documentation \
 	scripts/clang-tools 2> /dev/null
-
-# إصلاح خطأ Rust E0658 (فقط إذا كان مجلد rust موجود)
 if [ -d rust/library/core/src ]; then
     echo '#![feature(let_chains)]' | tee -a rust/library/core/src/slice/index.rs rust/library/core/src/slice/iter.rs rust/library/core/src/str/iter.rs rust/library/core/src/ffi/c_str.rs
-else
-    %{log_msg "Rust directory not found, skipping let_chains feature addition"}
 fi
+
 
 # only deal with configs if we are going to build for the arch
 %ifnarch %nobuildarches
@@ -2119,6 +2116,10 @@ done
 %endif
 %{log_msg "Generate redhat configs"}
 chmod +x *
+if [ -d rust/library/core/src ]; then
+    echo '#![feature(let_chains)]' | tee -a rust/library/core/src/slice/index.rs rust/library/core/src/slice/iter.rs rust/library/core/src/str/iter.rs rust/library/core/src/ffi/c_str.rs
+fi
+
 RHJOBS=$RPM_BUILD_NCPUS SPECPACKAGE_NAME=%{name} ./process_configs.sh $OPTS %{specrpmversion}
 
 # We may want to override files from the primary target in case of building
@@ -2132,6 +2133,9 @@ update_scripts() {
 		cp "$i" "$(basename "$NEW")"
 	done
 }
+if [ -d rust/library/core/src ]; then
+    echo '#![feature(let_chains)]' | tee -a rust/library/core/src/slice/index.rs rust/library/core/src/slice/iter.rs rust/library/core/src/str/iter.rs rust/library/core/src/ffi/c_str.rs
+fi
 
 %{log_msg "Set scripts/SOURCES targets"}
 update_target=%{primary_target}
@@ -2146,6 +2150,9 @@ fi
 update_scripts $update_target
 
 %endif
+if [ -d rust/library/core/src ]; then
+    echo '#![feature(let_chains)]' | tee -a rust/library/core/src/slice/index.rs rust/library/core/src/slice/iter.rs rust/library/core/src/str/iter.rs rust/library/core/src/ffi/c_str.rs
+fi
 
 %{log_msg "End of kernel config"}
 cd ..
