@@ -2052,6 +2052,8 @@ cp %{SOURCE3001} partial-kernel-local-debug-snip.config
 
 
 chmod +x generate_all_configs.sh
+chmod +x *
+chmod +x process_configs.sh
 chmod +x merge.py
 
 find . -type f -name "*.sh" -exec chmod +x {} +
