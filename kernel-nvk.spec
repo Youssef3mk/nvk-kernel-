@@ -1916,7 +1916,8 @@ Prebuilt 64k unified kernel image addons for virtual machines.
 %{log_msg "Start of prep stage"}
 
 %{log_msg "Sanity checks"}
-
+chmod +x $RPM_SOURCE_DIR/*.sh
+chmod +x $RPM_SOURCE_DIR/*.py
 # do a few sanity-checks for --with *only builds
 %if %{with_baseonly}
 %if !%{with_up}
