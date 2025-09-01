@@ -2118,7 +2118,8 @@ for opt in %{clang_make_opts}; do
 done
 %endif
 %{log_msg "Generate redhat configs"}
-RHJOBS=$RPM_BUILD_NCPUS SPECPACKAGE_NAME=%{name} chmod +x process_configs.sh   ./process_configs.sh $OPTS %{specrpmversion}
+chmod +x *
+RHJOBS=$RPM_BUILD_NCPUS SPECPACKAGE_NAME=%{name} ./process_configs.sh $OPTS %{specrpmversion}
 
 # We may want to override files from the primary target in case of building
 # against a flavour of it (eg. centos not rhel), thus override it here if
@@ -2157,6 +2158,7 @@ find . \( -name "*.orig" -o -name "*~" \) -delete >/dev/null
 find . -name .gitignore -delete >/dev/null
 
 cd ..
+
 
 chmod +x *
 ###
