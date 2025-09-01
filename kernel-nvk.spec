@@ -2,6 +2,7 @@
 # Per the below section about __spec_install_pre, any rpm
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
+%define nopatches 1
 
 # Disable frame pointers
 %undefine _include_frame_pointers
@@ -1992,7 +1993,7 @@ cp -a %{SOURCE1} .
 %{log_msg "Start of patch applications"}
 %if !%{nopatches}
 
-ApplyOptionalPatch patch-%{patchversion}-redhat.patch
+#ApplyOptionalPatch patch-%{patchversion}-redhat.patch
 %endif
 
 ApplyOptionalPatch linux-kernel-test.patch
