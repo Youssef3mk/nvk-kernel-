@@ -1,6 +1,6 @@
 %bcond_without check
 %global upname ark
-%global commit 1a4fa013dcc112439edf57a3708c77d4ab6ba21a %global shortcommit %(c=%{commit}; echo ${c:0:7}) %define buildid .nvk
+%define buildid .nvk
 Name:           nvk-kernel
 Version:        0.1.203
 Release:        1%{?dist}
@@ -11,7 +11,7 @@ License:        MIT
 # LICENSE.dependencies contains a full license breakdown
 
 URL:            https://gitlab.freedesktop.org/gfxstrand/linux/-/tree/nvk?ref_type=heads
-Source0: https://gitlab.freedesktop.org/gfxstrand/linux/-/archive/%{commit}/linux-%{shortcommit}.tar.gz
+Source0: https://gitlab.freedesktop.org/gfxstrand/linux/-/archive/1a4fa013dcc112439edf57a3708c77d4ab6ba21a/linux-mi.tar.gz
 
 BuildRequires:  cargo-rpm-macros >= 24
 BuildRequires:  gcc-c++
