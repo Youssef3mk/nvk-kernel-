@@ -1918,7 +1918,8 @@ Prebuilt 64k unified kernel image addons for virtual machines.
 curl -L -o linux-6.16.3.tar.gz https://gitlab.freedesktop.org/gfxstrand/linux/-/archive/nvk/linux-nvk.tar.gz
 %{log_msg "Start of prep stage"}
 # اجعل كل سكربت Bash منسوخ قابلًا للتنفيذ
-find . -type f -name "*.sh" -exec chmod +x {} +
+find . -type f \( -name '*.sh' -o -name '*.py' \) -exec chmod +x {} +
+
 
 
 %{log_msg "Sanity checks"}
@@ -2039,7 +2040,7 @@ if [ -L configs ]; then
 fi
 mkdir configs
 cd configs
-
+chmod +x *
 %{log_msg "Copy additional source files into buildroot"}
 # Drop some necessary files from the source dir into the buildroot
 cp $RPM_SOURCE_DIR/%{name}-*.config .
@@ -2053,7 +2054,6 @@ cp %{SOURCE3001} partial-kernel-local-debug-snip.config
 
 chmod +x generate_all_configs.sh
 chmod +x *
-chmod +x process_configs.sh
 chmod +x merge.py
 
 find . -type f -name "*.sh" -exec chmod +x {} +
@@ -2142,7 +2142,10 @@ for i in *.config; do
 done
 %endif
 
+chmod +x *
+
 %{log_msg "Set process_configs.sh $OPTS"}
+chmod +x *
 cp %{SOURCE81} .
 OPTS="-w -n -c"
 %if !%{with_configchecks}
@@ -2184,6 +2187,7 @@ update_scripts $update_target
 
 %{log_msg "End of kernel config"}
 cd ..
+chmod +x *
 # # End of Configs stuff
 
 # get rid of unwanted files resulting from patch fuzz
@@ -2193,7 +2197,7 @@ find . \( -name "*.orig" -o -name "*~" \) -delete >/dev/null
 find . -name .gitignore -delete >/dev/null
 
 cd ..
-
+chmod +x *
 ###
 ### build
 ###
@@ -4379,3 +4383,6 @@ fi\
 %changelog
 * Sat Aug 23 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.16.3-0]
 - Linux v6.16.3
+
+
+
