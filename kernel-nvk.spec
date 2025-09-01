@@ -108,17 +108,6 @@ Summary: The Linux kernel
 %global signkernel 0
 %endif
 
-# RHEL/CentOS specific .SBAT entries
-%if 0%{?centos}
-%global sbat_suffix centos
-%else
-%if 0%{?fedora}
-%global sbat_suffix fedora
-%else
-%global sbat_suffix rhel
-%endif
-%endif
-
 # Sign modules on all arches
 %global signmodules 1
 
@@ -172,35 +161,19 @@ Summary: The Linux kernel
 #  to build the base kernel using the debug configuration. (Specifying
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
-%define buildid .vanilla
-%define specrpmversion 6.15.0
-%define specversion 6.15.0
-%define patchversion 6.15
-#%%define pkgrelease 0.rc3.250831.c8bc81a5.34.vanilla
+# define buildid .local
+%define specrpmversion 6.16.3
+%define specversion 6.16.3
+%define patchversion 6.16
+%define pkgrelease 200
 %define kversion 6
-%define tarfile_release 6.15-rc3-272-gc8bc81a52d5a
+%define tarfile_release 6.16.3
 # This is needed to do merge window version magic
-%define patchlevel 17
+%define patchlevel 16
 # This allows pkg_release to have configurable %%{?dist} tag
-#%%define specrelease 0.rc3.250831.c8bc81a5.34%{?buildid}%{?dist}
+%define specrelease 200%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.15.0
-
-# adjustments for kernel-vanilla builds
-#
-%define packager Thorsten Leemhuis https://fedoraproject.org/wiki/Kernel_Vanilla_Repositories
-#
-%define arkupstreambuild 0.rc3.250831.c8bc81a5.
-#
-%define arkbuild 34
-%if 0%{?fedora}
-%define distbuildid %{lua: print(rpm.expand("%{arkbuild}") + (rpm.expand("%{fedora}") - 40 ) * 100)}
-%endif
-#
-%define pkgrelease %{?arkupstreambuild}%{distbuildid}%{buildid}
-%define specrelease %{?arkupstreambuild}%{distbuildid}%{?buildid}%{?dist}
-#
-# end of adjustments for kernel-vanilla builds
+%define kabiversion 6.16.3
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -216,7 +189,6 @@ Summary: The Linux kernel
 # should not be exported to RPM provides
 %global __provides_exclude_from ^%{_libexecdir}/kselftests
 
-%define _without_configchecks 1
 # The following build options are (mostly) enabled by default, but may become
 # enabled/disabled by later architecture-specific checks.
 # Where disabled by default, they can be enabled by using --with <opt> in the
@@ -229,25 +201,17 @@ Summary: The Linux kernel
 # build the base variants
 %define with_base      %{?_without_base:      0} %{?!_without_base:      1}
 # build also debug variants
-%define with_debug     %{?_with_debug:        1} %{?!_with_debug:        0}
+%define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
 # kernel-zfcpdump (s390 specific kernel for zfcpdump)
 %define with_zfcpdump  %{?_without_zfcpdump:  0} %{?!_without_zfcpdump:  1}
 # kernel-16k (aarch64 kernel with 16K page_size)
 %define with_arm64_16k %{?_with_arm64_16k:    1} %{?!_with_arm64_16k:    0}
 # kernel-64k (aarch64 kernel with 64K page_size)
 %define with_arm64_64k %{?_without_arm64_64k: 0} %{?!_without_arm64_64k: 1}
-# we default reatime builds to off for fedora and on for rhel/centos/eln
-%if 0%{?fedora}
-# kernel-rt (x86_64 and aarch64 only PREEMPT_RT enabled kernel)
-%define with_realtime  %{?_without_realtime:  0} %{?!_without_realtime:  1}
-# kernel-rt-64k (aarch64 RT kernel with 64K page_size)
-%define with_realtime_arm64_64k %{?_with_realtime_arm64_64k: 1} %{?!_with_realtime_arm64_64k: 0}
-%else
 # kernel-rt (x86_64 and aarch64 only PREEMPT_RT enabled kernel)
 %define with_realtime  %{?_without_realtime:  0} %{?!_without_realtime:  1}
 # kernel-rt-64k (aarch64 RT kernel with 64K page_size)
 %define with_realtime_arm64_64k %{?_without_realtime_arm64_64k: 0} %{?!_without_realtime_arm64_64k: 1}
-%endif
 # kernel-automotive (x86_64 and aarch64 with PREEMPT_RT enabled - currently off by default)
 %define with_automotive %{?_with_automotive:  1} %{?!_with_automotive:   0}
 
@@ -272,7 +236,7 @@ Summary: The Linux kernel
 # tools
 %define with_tools     %{?_without_tools:     0} %{?!_without_tools:     1}
 # ynl
-%define with_ynl       %{?_without_ynl:       0} %{?!_without_ynl:       1}
+%define with_ynl      %{?_without_ynl:      0} %{?!_without_ynl:      1}
 # kernel-debuginfo
 %define with_debuginfo %{?_without_debuginfo: 0} %{?!_without_debuginfo: 1}
 # kernel-abi-stablelists
@@ -316,7 +280,7 @@ Summary: The Linux kernel
 %define with_cross    %{?_with_cross:         1} %{?!_with_cross:        0}
 #
 # build a release kernel on rawhide
-%define with_release   %{?_without_release:   0} %{?!_without_release:   1}
+%define with_release   %{?_with_release:      1} %{?!_with_release:      0}
 
 # verbose build, i.e. no silent rules and V=1
 %define with_verbose %{?_with_verbose:        1} %{?!_with_verbose:      0}
@@ -338,15 +302,15 @@ Summary: The Linux kernel
 %define with_efiuki 0
 %endif
 
-# Disable for vanilla builds
-%define with_efiuki 0
-
 %if 0%{?fedora}
-# no ipa_clone for now
-%define with_ipaclones 0
+# Kernel headers are being split out into a separate package
+%define with_headers 0
+%define with_cross_headers 0
 # no stablelist
 %define with_kernel_abi_stablelists 0
 %define with_arm64_64k 0
+%define with_realtime 0
+%define with_realtime_arm64_64k 0
 %define with_automotive 0
 %endif
 
@@ -806,6 +770,7 @@ BuildRequires: sparse
 BuildRequires: zlib-devel binutils-devel newt-devel perl(ExtUtils::Embed) bison flex xz-devel
 BuildRequires: audit-libs-devel python3-setuptools
 BuildRequires: java-devel
+BuildRequires: libbpf-devel >= 0.6.0-1
 BuildRequires: libbabeltrace-devel
 BuildRequires: libtraceevent-devel
 %ifnarch s390x
@@ -827,11 +792,6 @@ BuildRequires: libbpf-devel
 BuildRequires: bpftool
 BuildRequires: clang
 
-%ifarch %{cpupowerarchs}
-# For libcpupower bindings
-BuildRequires: swig
-%endif
-
 %ifnarch s390x
 BuildRequires: pciutils-devel
 %endif
@@ -842,11 +802,7 @@ BuildRequires: libnl3-devel
 
 %if %{with_tools} && %{with_ynl}
 BuildRequires: python3-pyyaml python3-jsonschema python3-pip python3-setuptools >= 61
-%if 0%{?fedora}
-%if 0%{?fedora} < 42
-BuildRequires: python3-wheel
-%endif
-%endif
+BuildRequires: (python3-wheel if python3-setuptools < 70)
 %endif
 
 BuildRequires: openssl-devel
@@ -1078,10 +1034,6 @@ Source77: partial-clang_lto-aarch64-debug-snip.config
 Source80: generate_all_configs.sh
 Source81: process_configs.sh
 
-Source83: uki.sbat.template
-Source84: uki-addons.sbat.template
-Source85: kernel.sbat.template
-
 Source86: dracut-virt.conf
 
 Source87: flavors
@@ -1212,7 +1164,7 @@ Provides: kernel = %{specversion}-%{pkg_release}\
 Provides: %{name} = %{specversion}-%{pkg_release}\
 %endif\
 Provides: %{name}-%{_target_cpu} = %{specrpmversion}-%{pkg_release}%{uname_suffix %{?1}}\
-Provides: %{name}-uname-r = %{KVERREL}%{uname_suffix %{?1}}\
+Provides: %{name}-uname-r = %{KVERREL}%{uname_suffix %{?1:}}\
 Requires: %{name}%{?1:-%{1}}-modules-core-uname-r = %{KVERREL}%{uname_suffix %{?1}}\
 Requires(pre): %{kernel_prereq}\
 Requires(pre): %{initrd_prereq}\
@@ -2044,27 +1996,10 @@ ApplyOptionalPatch linux-kernel-test.patch
 %{log_msg "End of patch applications"}
 # END OF PATCH APPLICATIONS
 
-echo $'\n'$'\n'"#### kernel-vanilla-infodump: begin"$'\n'
-
-# print version from upstream sources for later examination in the logs
-grep -e '^\(VERSION\|PATCHLEVEL\|SUBLEVEL\|EXTRAVERSION\)' Makefile
-if [[ -e localversion-next ]]; then
-	cat localversion-next
-fi
-if [[ -s "$RPM_SOURCE_DIR/patch-%{patchversion}-redhat.patch" ]] && [[ -s "$RPM_SOURCE_DIR/Patchlist.changelog" ]]; then
-	echo $'\n'"## patch list and patches"$'\n'$'\n'
-	cat "$RPM_SOURCE_DIR/Patchlist.changelog"
-	cat "$RPM_SOURCE_DIR/patch-%{patchversion}-redhat.patch"
-fi
-
-echo $'\n'"#### kernel-vanilla-infodump: end"$'\n'$'\n'
-
 # Any further pre-build tree manipulations happen here.
 %{log_msg "Pre-build tree manipulations"}
 chmod +x scripts/checkpatch.pl
 mv COPYING COPYING-%{specrpmversion}-%{release}
-# This Prevents scripts/setlocalversion from mucking with our version numbers:
-rm -f localversion-next
 
 # on linux-next prevent scripts/setlocalversion from mucking with our version numbers
 rm -f localversion-next localversion-rt
@@ -2087,11 +2022,6 @@ rm -f localversion-next localversion-rt
 	tools \
 	Documentation \
 	scripts/clang-tools 2> /dev/null
-
-# SBAT data
-sed -e s,@KVER,%{KVERREL}, -e s,@SBAT_SUFFIX,%{sbat_suffix}, %{SOURCE83} > uki.sbat
-sed -e s,@KVER,%{KVERREL}, -e s,@SBAT_SUFFIX,%{sbat_suffix}, %{SOURCE84} > uki-addons.sbat
-sed -e s,@KVER,%{KVERREL}, -e s,@SBAT_SUFFIX,%{sbat_suffix}, %{SOURCE85} > kernel.sbat
 
 # only deal with configs if we are going to build for the arch
 %ifnarch %nobuildarches
@@ -2192,15 +2122,6 @@ cat imaca.pem >> ../certs/rhel.pem
 
 for i in *.config; do
   sed -i 's@CONFIG_SYSTEM_TRUSTED_KEYS=""@CONFIG_SYSTEM_TRUSTED_KEYS="certs/rhel.pem"@' $i
-  sed -i 's@CONFIG_EFI_SBAT_FILE=""@CONFIG_EFI_SBAT_FILE="kernel.sbat"@' $i
-done
-%endif
-
-# Adjust FIPS module name for RHEL
-%if 0%{?rhel}
-%{log_msg "Adjust FIPS module name for RHEL"}
-for i in *.config; do
-  sed -i 's/CONFIG_CRYPTO_FIPS_NAME=.*/CONFIG_CRYPTO_FIPS_NAME="Red Hat Enterprise Linux %{rhel} - Kernel Cryptographic API"/' $i
 done
 %endif
 
@@ -2843,30 +2764,52 @@ BuildKernel() {
     else
 %if %{with_efiuki}
         %{log_msg "Setup the EFI UKI kernel"}
+
+        # RHEL/CentOS specific .SBAT entries
+%if 0%{?centos}
+        SBATsuffix="centos"
+%else
+%if 0%{?fedora}
+        SBATsuffix="fedora"
+%else
+        SBATsuffix="rhel"
+%endif
+%endif
+        SBAT=$(cat <<- EOF
+	linux,1,Red Hat,linux,$KernelVer,mailto:secalert@redhat.com
+	linux.$SBATsuffix,1,Red Hat,linux,$KernelVer,mailto:secalert@redhat.com
+	kernel-uki-virt.$SBATsuffix,1,Red Hat,kernel-uki-virt,$KernelVer,mailto:secalert@redhat.com
+	EOF
+	)
+
+        ADDONS_SBAT=$(cat <<- EOF
+	sbat,1,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md
+	kernel-uki-virt-addons.$SBATsuffix,1,Red Hat,kernel-uki-virt-addons,$KernelVer,mailto:secalert@redhat.com
+	EOF
+	)
+
 	KernelUnifiedImageDir="$RPM_BUILD_ROOT/lib/modules/$KernelVer"
     	KernelUnifiedImage="$KernelUnifiedImageDir/$InstallName-virt.efi"
-	KernelUnifiedInitrd="$KernelUnifiedImageDir/$InstallName-virt.img"
 
     	mkdir -p $KernelUnifiedImageDir
 
     	dracut --conf=%{SOURCE86} \
            --confdir=$(mktemp -d) \
-           --no-hostonly \
            --verbose \
            --kver "$KernelVer" \
            --kmoddir "$RPM_BUILD_ROOT/lib/modules/$KernelVer/" \
            --logfile=$(mktemp) \
-	   $KernelUnifiedInitrd
-
-	ukify build --linux $(realpath $KernelImage) --initrd $KernelUnifiedInitrd \
-	   --sbat @uki.sbat --os-release @/etc/os-release --uname $KernelVer \
-	   --cmdline 'console=tty0 console=ttyS0' --output $KernelUnifiedImage
-
-	rm -f $KernelUnifiedInitrd
+           --uefi \
+%if 0%{?rhel} && !0%{?eln}
+           --sbat "$SBAT" \
+%endif
+           --kernel-image $(realpath $KernelImage) \
+           --kernel-cmdline 'console=tty0 console=ttyS0' \
+	   $KernelUnifiedImage
 
   KernelAddonsDirOut="$KernelUnifiedImage.extra.d"
   mkdir -p $KernelAddonsDirOut
-  python3 %{SOURCE151} %{SOURCE152} $KernelAddonsDirOut virt %{primary_target} %{_target_cpu} @uki-addons.sbat
+  python3 %{SOURCE151} %{SOURCE152} $KernelAddonsDirOut virt %{primary_target} %{_target_cpu} "$ADDONS_SBAT"
 
 %if %{signkernel}
 	%{log_msg "Sign the EFI UKI kernel"}
@@ -3204,8 +3147,6 @@ chmod +x tools/perf/check-headers.sh
 %ifarch %{cpupowerarchs}
     # link against in-tree libcpupower for idle state support
     %global rtla_make %{tools_make} LDFLAGS="%{__global_ldflags} -L../../power/cpupower" INCLUDES="-I../../power/cpupower/lib"
-    # Build libcpupower Python bindings
-    %global libcpupower_python_bindings_make %{tools_make} LDFLAGS="-L%{buildroot}%{_libdir} -lcpupower"
 %else
     %global rtla_make %{tools_make}
 %endif
@@ -3581,12 +3522,6 @@ mv cpupower.lang ../
     popd
 %endif
 chmod 0755 %{buildroot}%{_libdir}/libcpupower.so*
-%{log_msg "Build libcpupower Python bindings"}
-pushd tools/power/cpupower/bindings/python
-%{libcpupower_python_bindings_make}
-%{log_msg "Install libcpupower Python bindings"}
-%{make} INSTALL_DIR=$RPM_BUILD_ROOT%{python3_sitearch} install
-popd
 %endif
 %ifarch x86_64
    mkdir -p %{buildroot}%{_mandir}/man8
@@ -3946,18 +3881,11 @@ touch %{_localstatedir}/lib/rpm-state/%{name}/installing_core_%{KVERREL}%{?-v:+%
 
 #
 # This macro defines a %%preun script for a kernel package.
-#	%%kernel_variant_preun [-v <subpackage>] -u [uki-suffix] -e
-# Add kernel-install's --entry-type=type1|type2|all option (if supported) to limit removal
-# to a specific boot entry type.
+#	%%kernel_variant_preun [-v <subpackage>] -u [uki-suffix]
 #
-%define kernel_variant_preun(v:u:e) \
+%define kernel_variant_preun(v:u:) \
 %{expand:%%preun %{?-v:%{-v*}-}%{!?-u*:core}%{?-u*:uki-%{-u*}}}\
-entry_type=""\
-%{-e: \
-/bin/kernel-install --help|grep -q -- '--entry-type=' &&\
-    entry_type="--entry-type %{!?-u:type1}%{?-u:type2}" \
-}\
-/bin/kernel-install remove %{KVERREL}%{?-v:+%{-v*}} $entry_type || exit $?\
+/bin/kernel-install remove %{KVERREL}%{?-v:+%{-v*}} || exit $?\
 %if !%{with_automotive}\
 if [ -x %{_sbindir}/weak-modules ]\
 then\
@@ -3968,11 +3896,11 @@ fi\
 
 %if %{with_up_base} && %{with_efiuki}
 %kernel_variant_posttrans -u virt
-%kernel_variant_preun -u virt -e
+%kernel_variant_preun -u virt
 %endif
 
 %if %{with_up_base}
-%kernel_variant_preun -e
+%kernel_variant_preun
 %kernel_variant_post
 %endif
 
@@ -3983,52 +3911,52 @@ fi\
 
 %if %{with_up} && %{with_debug} && %{with_efiuki}
 %kernel_variant_posttrans -v debug -u virt
-%kernel_variant_preun -v debug -u virt -e
+%kernel_variant_preun -v debug -u virt
 %endif
 
 %if %{with_up} && %{with_debug}
-%kernel_variant_preun -v debug -e
+%kernel_variant_preun -v debug
 %kernel_variant_post -v debug
 %endif
 
 %if %{with_arm64_16k_base}
-%kernel_variant_preun -v 16k -e
+%kernel_variant_preun -v 16k
 %kernel_variant_post -v 16k
 %endif
 
 %if %{with_debug} && %{with_arm64_16k}
-%kernel_variant_preun -v 16k-debug -e
+%kernel_variant_preun -v 16k-debug
 %kernel_variant_post -v 16k-debug
 %endif
 
 %if %{with_arm64_16k} && %{with_debug} && %{with_efiuki}
 %kernel_variant_posttrans -v 16k-debug -u virt
-%kernel_variant_preun -v 16k-debug -u virt -e
+%kernel_variant_preun -v 16k-debug -u virt
 %endif
 
 %if %{with_arm64_16k_base} && %{with_efiuki}
 %kernel_variant_posttrans -v 16k -u virt
-%kernel_variant_preun -v 16k -u virt -e
+%kernel_variant_preun -v 16k -u virt
 %endif
 
 %if %{with_arm64_64k_base}
-%kernel_variant_preun -v 64k -e
+%kernel_variant_preun -v 64k
 %kernel_variant_post -v 64k
 %endif
 
 %if %{with_debug} && %{with_arm64_64k}
-%kernel_variant_preun -v 64k-debug -e
+%kernel_variant_preun -v 64k-debug
 %kernel_variant_post -v 64k-debug
 %endif
 
 %if %{with_arm64_64k} && %{with_debug} && %{with_efiuki}
 %kernel_variant_posttrans -v 64k-debug -u virt
-%kernel_variant_preun -v 64k-debug -u virt -e
+%kernel_variant_preun -v 64k-debug -u virt
 %endif
 
 %if %{with_arm64_64k_base} && %{with_efiuki}
 %kernel_variant_posttrans -v 64k -u virt
-%kernel_variant_preun -v 64k -u virt -e
+%kernel_variant_preun -v 64k -u virt
 %endif
 
 %if %{with_realtime_base}
@@ -4224,9 +4152,6 @@ fi\
 %{_includedir}/cpufreq.h
 %{_includedir}/cpuidle.h
 %{_includedir}/powercap.h
-# libcpupower Python bindings
-%{python3_sitearch}/_raw_pylibcpupower.so
-%{python3_sitearch}/raw_pylibcpupower.py
 %endif
 %if %{with_ynl}
 %{_libdir}/libynl*
@@ -4435,6 +4360,6 @@ fi\
 #
 #
 %changelog
-* Sun Aug 31 2025 Thorsten Leemhuis <fedora@leemhuis.info> [6.15.0-0.rc3.250831.c8bc81a5.34.vanilla]
-- import ark-infra from kvc-infra-mainline-latest (bf6902665dd) (Thorsten Leemhuis)
-- Linux v6.15.0-0.rc3.250831.c8bc81a5
+* Sat Aug 23 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.16.3-0]
+- Linux v6.16.3
+
