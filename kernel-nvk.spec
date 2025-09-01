@@ -1910,7 +1910,7 @@ Prebuilt 64k unified kernel image addons for virtual machines.
 %define log_msg() \
 	{ set +x; } 2>/dev/null \
 	_log_msglineno=$(grep -n %{*} %{_specdir}/${RPM_PACKAGE_NAME}.spec | grep log_msg | cut -d":" -f1) \
-	echo "kernel.spec:${_log_msglineno}: %{*}" \
+	echo "kernel-nvk.spec:${_log_msglineno}: %{*}" \
 	set -x
 %prep
 %{log_msg "Start of prep stage"}
