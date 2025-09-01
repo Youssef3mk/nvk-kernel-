@@ -1,5 +1,5 @@
 Name:           kernel-nvk
-Version:        6.15  # يمكن تعديل الإصدار بناءً على آخر إصدار في الفرع nvk، تحقق من المستودع
+Version:        6.15 
 Release:        1%{?dist}
 Summary:        Linux Kernel from NVK branch
 
