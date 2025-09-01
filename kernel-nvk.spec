@@ -162,18 +162,18 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 # define buildid .local
-%define specrpmversion 6.15.3
-%define specversion 6.15.3
-%define patchversion 6.15
+%define specrpmversion 6.16.3
+%define specversion 6.16.3
+%define patchversion 6.16
 %define pkgrelease 200
 %define kversion 6
-%define tarfile_release 6.15.3
+%define tarfile_release 6.16.3
 # This is needed to do merge window version magic
 %define patchlevel 16
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 200%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.15.3
+%define kabiversion 6.16.3
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -927,11 +927,12 @@ BuildRequires: redhat-sb-certs >= 9.4-0.1
 # xzcat -qq ${TARBALL} | git get-tar-commit-id
 Source0:  https://gitlab.freedesktop.org/gfxstrand/linux/-/archive/nvk/linux-nvk.tar.gz
 
-Source1: Makefile.rhelver
-Source2: %{package_name}.changelog
+Source1: https://github.com/Youssef3mk/nvk-kernel-/Makefile.rhelver
+Source2: https://github.com/Youssef3mk/nvk-kernel-/%{package_name}.changelog
 
-Source10: redhatsecurebootca5.cer
-Source13: redhatsecureboot501.cer
+
+Source10:  https://github.com/Youssef3mk/nvk-kernel-/redhatsecurebootca5.cer
+Source13:  https://github.com/Youssef3mk/nvk-kernel-/redhatsecureboot501.cer
 
 %if %{signkernel}
 # Name of the packaged file containing signing key
@@ -974,80 +975,80 @@ Source13: redhatsecureboot501.cer
 # signkernel
 %endif
 
-Source20: mod-denylist.sh
-Source21: mod-sign.sh
-Source22: filtermods.py
+Source20:  https://github.com/Youssef3mk/nvk-kernel-/mod-denylist.sh
+Source21:  https://github.com/Youssef3mk/nvk-kernel-/mod-sign.sh
+Source22:  https://github.com/Youssef3mk/nvk-kernel-/filtermods.py
 
 %define modsign_cmd %{SOURCE21}
 
 %if 0%{?include_rhel}
-Source24: %{name}-aarch64-rhel.config
-Source25: %{name}-aarch64-debug-rhel.config
-Source27: %{name}-ppc64le-rhel.config
-Source28: %{name}-ppc64le-debug-rhel.config
-Source29: %{name}-s390x-rhel.config
-Source30: %{name}-s390x-debug-rhel.config
-Source31: %{name}-s390x-zfcpdump-rhel.config
-Source32: %{name}-x86_64-rhel.config
-Source33: %{name}-x86_64-debug-rhel.config
+Source24:  https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-rhel.config
+Source25:  https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-debug-rhel.config
+Source27:  https://github.com/Youssef3mk/nvk-kernel-/%{name}-ppc64le-rhel.config
+Source28: https://github.com/Youssef3mk/nvk-kernel-/%{name}-ppc64le-debug-rhel.config
+Source29: https://github.com/Youssef3mk/nvk-kernel-/%{name}-s390x-rhel.config
+Source30: https://github.com/Youssef3mk/nvk-kernel-/%{name}-s390x-debug-rhel.config
+Source31: https://github.com/Youssef3mk/nvk-kernel-/%{name}-s390x-zfcpdump-rhel.config
+Source32: https://github.com/Youssef3mk/nvk-kernel-/%{name}-x86_64-rhel.config
+Source33: https://github.com/Youssef3mk/nvk-kernel-/%{name}-x86_64-debug-rhel.config
 # ARM64 64K page-size kernel config
-Source42: %{name}-aarch64-64k-rhel.config
-Source43: %{name}-aarch64-64k-debug-rhel.config
+Source42: https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-64k-rhel.config
+Source43:https://github.com/Youssef3mk/nvk-kernel-/ %{name}-aarch64-64k-debug-rhel.config
 
-Source44: %{name}-riscv64-rhel.config
-Source45: %{name}-riscv64-debug-rhel.config
+Source44: https://github.com/Youssef3mk/nvk-kernel-/%{name}-riscv64-rhel.config
+Source45: https://github.com/Youssef3mk/nvk-kernel-/%{name}-riscv64-debug-rhel.config
 %endif
 
 %if %{include_rhel} || %{include_automotive}
-Source23: x509.genkey.rhel
-Source34: def_variants.yaml.rhel
-Source41: x509.genkey.centos
+Source23: https://github.com/Youssef3mk/nvk-kernel-/x509.genkey.rhel
+Source34: https://github.com/Youssef3mk/nvk-kernel-/def_variants.yaml.rhel
+Source41: https://github.com/Youssef3mk/nvk-kernel-/x509.genkey.centos
 %endif
 
 %if 0%{?include_fedora}
-Source50: x509.genkey.fedora
+Source50: https://github.com/Youssef3mk/nvk-kernel-/x509.genkey.fedora
 
-Source52: %{name}-aarch64-fedora.config
-Source53: %{name}-aarch64-debug-fedora.config
-Source54: %{name}-aarch64-16k-fedora.config
-Source55: %{name}-aarch64-16k-debug-fedora.config
-Source56: %{name}-ppc64le-fedora.config
-Source57: %{name}-ppc64le-debug-fedora.config
-Source58: %{name}-s390x-fedora.config
-Source59: %{name}-s390x-debug-fedora.config
-Source60: %{name}-x86_64-fedora.config
-Source61: %{name}-x86_64-debug-fedora.config
-Source700: %{name}-riscv64-fedora.config
-Source701: %{name}-riscv64-debug-fedora.config
+Source52: https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-fedora.config
+Source53: https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-debug-fedora.config
+Source54: https://github.com/Youssef3mk/nvk-kernel-/https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-16k-fedora.config
+Source55: https://github.com/Youssef3mk/nvk-kernel-/https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-16k-debug-fedora.config
+Source56: https://github.com/Youssef3mk/nvk-kernel-/https://github.com/Youssef3mk/nvk-kernel-/%{name}-ppc64le-fedora.config
+Source57: https://github.com/Youssef3mk/nvk-kernel-/https://github.com/Youssef3mk/nvk-kernel-/%{name}-ppc64le-debug-fedora.config
+Source58: https://github.com/Youssef3mk/nvk-kernel-/https://github.com/Youssef3mk/nvk-kernel-/%{name}-s390x-fedora.config
+Source59: https://github.com/Youssef3mk/nvk-kernel-/https://github.com/Youssef3mk/nvk-kernel-/%{name}-s390x-debug-fedora.config
+Source60: https://github.com/Youssef3mk/nvk-kernel-/https://github.com/Youssef3mk/nvk-kernel-/%{name}-x86_64-fedora.config
+Source61: https://github.com/Youssef3mk/nvk-kernel-/https://github.com/Youssef3mk/nvk-kernel-/%{name}-x86_64-debug-fedora.config
+Source700: https://github.com/Youssef3mk/nvk-kernel-/https://github.com/Youssef3mk/nvk-kernel-/%{name}-riscv64-fedora.config
+Source701: https://github.com/Youssef3mk/nvk-kernel-/https://github.com/Youssef3mk/nvk-kernel-/%{name}-riscv64-debug-fedora.config
 
-Source62: def_variants.yaml.fedora
+Source62: https://github.com/Youssef3mk/nvk-kernel-/https://github.com/Youssef3mk/nvk-kernel-/def_variants.yaml.fedora
 %endif
 
-Source70: partial-kgcov-snip.config
-Source71: partial-kgcov-debug-snip.config
-Source72: partial-clang-snip.config
-Source73: partial-clang-debug-snip.config
-Source74: partial-clang_lto-x86_64-snip.config
-Source75: partial-clang_lto-x86_64-debug-snip.config
-Source76: partial-clang_lto-aarch64-snip.config
-Source77: partial-clang_lto-aarch64-debug-snip.config
-Source80: generate_all_configs.sh
-Source81: process_configs.sh
+Source70: https://github.com/Youssef3mk/nvk-kernel-/https://github.com/Youssef3mk/nvk-kernel-/partial-kgcov-snip.config
+Source71: https://github.com/Youssef3mk/nvk-kernel-/https://github.com/Youssef3mk/nvk-kernel-/partial-kgcov-debug-snip.config
+Source72: https://github.com/Youssef3mk/nvk-kernel-/partial-clang-snip.config
+Source73: https://github.com/Youssef3mk/nvk-kernel-/partial-clang-debug-snip.config
+Source74: https://github.com/Youssef3mk/nvk-kernel-/partial-clang_lto-x86_64-snip.config
+Source75: https://github.com/Youssef3mk/nvk-kernel-/partial-clang_lto-x86_64-debug-snip.config
+Source76: https://github.com/Youssef3mk/nvk-kernel-/partial-clang_lto-aarch64-snip.config
+Source77: https://github.com/Youssef3mk/nvk-kernel-/partial-clang_lto-aarch64-debug-snip.config
+Source80: https://github.com/Youssef3mk/nvk-kernel-/generate_all_configs.sh
+Source81: https://github.com/Youssef3mk/nvk-kernel-/process_configs.sh
 
-Source86: dracut-virt.conf
+Source86: https://github.com/Youssef3mk/nvk-kernel-/dracut-virt.conf
 
-Source87: flavors
+Source87: https://github.com/Youssef3mk/nvk-kernel-/flavors
 
-Source151: uki_create_addons.py
-Source152: uki_addons.json
+Source151: https://github.com/Youssef3mk/nvk-kernel-/uki_create_addons.py
+Source152: https://github.com/Youssef3mk/nvk-kernel-/uki_addons.json
 
-Source100: rheldup3.x509
-Source101: rhelkpatch1.x509
-Source102: nvidiagpuoot001.x509
-Source103: rhelimaca1.x509
-Source104: rhelima.x509
-Source105: rhelima_centos.x509
-Source106: fedoraimaca.x509
+Source100: https://github.com/Youssef3mk/nvk-kernel-/rheldup3.x509
+Source101: https://github.com/Youssef3mk/nvk-kernel-/rhelkpatch1.x509
+Source102: https://github.com/Youssef3mk/nvk-kernel-/nvidiagpuoot001.x509
+Source103: https://github.com/Youssef3mk/nvk-kernel-/rhelimaca1.x509
+Source104: https://github.com/Youssef3mk/nvk-kernel-/rhelima.x509
+Source105: https://github.com/Youssef3mk/nvk-kernel-/rhelima_centos.x509
+Source106: https://github.com/Youssef3mk/nvk-kernel-/fedoraimaca.x509
 
 %if 0%{?fedora}%{?eln}
 %define ima_ca_cert %{SOURCE106}
@@ -1066,80 +1067,80 @@ Source106: fedoraimaca.x509
 
 %define ima_cert_name ima.cer
 
-Source200: check-kabi
+Source200: https://github.com/Youssef3mk/nvk-kernel-/check-kabi
 
-Source201: Module.kabi_aarch64
-Source202: Module.kabi_ppc64le
-Source203: Module.kabi_s390x
-Source204: Module.kabi_x86_64
-Source205: Module.kabi_riscv64
+Source201: https://github.com/Youssef3mk/nvk-kernel-/Module.kabi_aarch64
+Source202: https://github.com/Youssef3mk/nvk-kernel-/Module.kabi_ppc64le
+Source203: https://github.com/Youssef3mk/nvk-kernel-/Module.kabi_s390x
+Source204: https://github.com/Youssef3mk/nvk-kernel-/Module.kabi_x86_64
+Source205: https://github.com/Youssef3mk/nvk-kernel-/odule.kabi_riscv64
 
-Source210: Module.kabi_dup_aarch64
-Source211: Module.kabi_dup_ppc64le
-Source212: Module.kabi_dup_s390x
-Source213: Module.kabi_dup_x86_64
-Source214: Module.kabi_dup_riscv64
+Source210: https://github.com/Youssef3mk/nvk-kernel-/Module.kabi_dup_aarch64
+Source211: https://github.com/Youssef3mk/nvk-kernel-/Module.kabi_dup_ppc64le
+Source212: https://github.com/Youssef3mk/nvk-kernel-/Module.kabi_dup_s390x
+Source213: https://github.com/Youssef3mk/nvk-kernel-/Module.kabi_dup_x86_64
+Source214: https://github.com/Youssef3mk/nvk-kernel-/Module.kabi_dup_riscv64
 
-Source300: kernel-abi-stablelists-%{kabiversion}.tar.xz
-Source301: kernel-kabi-dw-%{kabiversion}.tar.xz
+Source300: https://github.com/Youssef3mk/nvk-kernel-/kernel-abi-stablelists-%{kabiversion}.tar.xz
+Source301: https://github.com/Youssef3mk/nvk-kernel-/kernel-kabi-dw-%{kabiversion}.tar.xz
 
 %if 0%{include_rt}
 %if 0%{include_rhel}
-Source474: %{name}-aarch64-rt-rhel.config
-Source475: %{name}-aarch64-rt-debug-rhel.config
-Source476: %{name}-aarch64-rt-64k-rhel.config
-Source477: %{name}-aarch64-rt-64k-debug-rhel.config
-Source478: %{name}-x86_64-rt-rhel.config
-Source479: %{name}-x86_64-rt-debug-rhel.config
+Source474: https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-rt-rhel.config
+Source475: https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-rt-debug-rhel.config
+Source476: https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-rt-64k-rhel.config
+Source477: https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-rt-64k-debug-rhel.config
+Source478: https://github.com/Youssef3mk/nvk-kernel-/%{name}-x86_64-rt-rhel.config
+Source479: https://github.com/Youssef3mk/nvk-kernel-/%{name}-x86_64-rt-debug-rhel.config
 %endif
 %if 0%{include_fedora}
-Source480: %{name}-aarch64-rt-fedora.config
-Source481: %{name}-aarch64-rt-debug-fedora.config
-Source482: %{name}-aarch64-rt-64k-fedora.config
-Source483: %{name}-aarch64-rt-64k-debug-fedora.config
-Source484: %{name}-x86_64-rt-fedora.config
-Source485: %{name}-x86_64-rt-debug-fedora.config
-Source486: %{name}-riscv64-rt-fedora.config
-Source487: %{name}-riscv64-rt-debug-fedora.config
+Source480: https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-rt-fedora.config
+Source481: https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-rt-debug-fedora.config
+Source482: https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-rt-64k-fedora.config
+Source483: https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-rt-64k-debug-fedora.config
+Source484: https://github.com/Youssef3mk/nvk-kernel-/%{name}-x86_64-rt-fedora.config
+Source485: https://github.com/Youssef3mk/nvk-kernel-/%{name}-x86_64-rt-debug-fedora.config
+Source486: https://github.com/Youssef3mk/nvk-kernel-/%{name}-riscv64-rt-fedora.config
+Source487: https://github.com/Youssef3mk/nvk-kernel-/%{name}-riscv64-rt-debug-fedora.config
 %endif
 %endif
 
 %if %{include_automotive}
 %if %{with_automotive_build}
-Source488: %{name}-aarch64-rhel.config
-Source489: %{name}-aarch64-debug-rhel.config
-Source490: %{name}-x86_64-rhel.config
-Source491: %{name}-x86_64-debug-rhel.config
+Source488: https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-rhel.config
+Source489: https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-debug-rhel.config
+Source490: https://github.com/Youssef3mk/nvk-kernel-/%{name}-x86_64-rhel.config
+Source491: https://github.com/Youssef3mk/nvk-kernel-/%{name}-x86_64-debug-rhel.config
 %else
-Source488: %{name}-aarch64-automotive-rhel.config
-Source489: %{name}-aarch64-automotive-debug-rhel.config
-Source490: %{name}-x86_64-automotive-rhel.config
-Source491: %{name}-x86_64-automotive-debug-rhel.config
+Source488: https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-automotive-rhel.config
+Source489: https://github.com/Youssef3mk/nvk-kernel-/%{name}-aarch64-automotive-debug-rhel.config
+Source490: https://github.com/Youssef3mk/nvk-kernel-/%{name}-x86_64-automotive-rhel.config
+Source491: https://github.com/Youssef3mk/nvk-kernel-/%{name}-x86_64-automotive-debug-rhel.config
 %endif
 %endif
 
 
 # Sources for kernel-tools
-Source2002: kvm_stat.logrotate
+Source2002: https://github.com/Youssef3mk/nvk-kernel-/kvm_stat.logrotate
 
 # Some people enjoy building customized kernels from the dist-git in Fedora and
 # use this to override configuration options. One day they may all use the
 # source tree, but in the mean time we carry this to support the legacy workflow
-Source3000: merge.py
-Source3001: kernel-local
+Source3000: https://github.com/Youssef3mk/nvk-kernel-/merge.py
+Source3001: https://github.com/Youssef3mk/nvk-kernel-/kernel-local
 %if %{patchlist_changelog}
-Source3002: Patchlist.changelog
+Source3002: https://github.com/Youssef3mk/nvk-kernel-/Patchlist.changelog
 %endif
 
-Source4000: README.rst
-Source4001: rpminspect.yaml
-Source4002: gating.yaml
+Source4000: https://github.com/Youssef3mk/nvk-kernel-/README.rst
+Source4001: https://github.com/Youssef3mk/nvk-kernel-/rpminspect.yaml
+Source4002: https://github.com/Youssef3mk/nvk-kernel-/gating.yaml
 
 ## Patches needed for building this package
 
 %if !%{nopatches}
 
-Patch1: patch-%{patchversion}-redhat.patch
+Patch1: https://github.com/Youssef3mk/nvk-kernel-/patch-%{patchversion}-redhat.patch
 %endif
 
 # empty final patch to facilitate testing of kernel patches
@@ -4360,6 +4361,5 @@ fi\
 #
 #
 %changelog
-* Sat Aug 23 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.15.3-0]
-- Linux v6.15.3
-
+* Sat Aug 23 2025 Justin M. Forbes <jforbes@fedoraproject.org> [6.16.3-0]
+- Linux v6.16.3
