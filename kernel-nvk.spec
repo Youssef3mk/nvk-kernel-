@@ -1,11 +1,11 @@
 Name:           kernel-nvk
-Version:        6.15
+Version:       6.15
 Release:        1%{?dist}
 Summary:        Linux Kernel from NVK branch on GitLab
 
 License:        GPL-2.0-only
 URL:            https://gitlab.freedesktop.org/gfxstrand/linux
-Source0:       https://gitlab.freedesktop.org/gfxstrand/linux/-/archive/nvk/linux-nvk.tar.gz
+Source0:        https://gitlab.freedesktop.org/gfxstrand/linux/-/archive/nvk/linux-nvk.tar.gz
 
 BuildRequires:  bc bison dwarves elfutils-libelf-devel flex gcc gettext-devel kmod make ncurses-devel openssl-devel perl python3-devel
 
@@ -13,7 +13,7 @@ BuildRequires:  bc bison dwarves elfutils-libelf-devel flex gcc gettext-devel km
 Custom Linux kernel built directly from the NVK branch on GitLab, without additional patches.
 
 %prep
-%autosetup -S git
+%setup -q -n linux-nvk
 
 make defconfig
 
